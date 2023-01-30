@@ -1,5 +1,18 @@
 import sql
 
+def input_integer(message, message_error):
+    a = None
+    while True:
+        if a is None:
+            try:
+                a = int(input(message))
+                break
+            except ValueError:
+                print(message_error)
+                continue
+
+    return a
+
 
 def add_student_data():
     name = input("Введите имя \n")
@@ -16,8 +29,7 @@ def show_all():
 
 
 def change_student_data():
-    id_for_changing = input("Введите id студента, информацию о котором хотите именить в БД: \n")
-    #нужно проверить что число введено
+    id_for_changing = input_integer('Введите id студента, информацию о котором хотите именить в БД: ', 'Введите корректное id' )
     new_name = input("Введите новое имя студента: \n")
     new_sur_name = input("Введите Фамилию \n")
     new_gender = input("Введите пол \n")
@@ -53,7 +65,7 @@ def change_student_data():
 
 #удаляем всю строку
 def delete_student_data():
-    delete_st = input("Введите id студента, которого хотите удалить из БД: \n")
+    delete_st = input_integer('Введите id студента, которого хотите удалить из БД: ', 'Введите корректное id')
     sql.cur.execute('DELETE FROM students WHERE id = ?;',
                     ((delete_st)))
     result = sql.cur.fetchall()
