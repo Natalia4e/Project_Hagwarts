@@ -65,6 +65,7 @@ def show_all():
     # тут будет проверка, существует ли таблица. Нужна эта проверка или библиотека автоматически это делает?
     sql.cur.execute('SELECT * FROM students;')
     result = sql.cur.fetchall()
+    print("\n\n")
     for i in result:
         print(*i)
     print('\n\n')
@@ -73,40 +74,26 @@ def show_all():
 
 def change_student_data():
     id_for_changing = input_integer(
-        'Введите id студента, информацию о котором хотите именить в БД: ', 'Введите корректное id')
-    new_name, new_sur_name, new_gender, new_faculty = data_input_new_student()
+        'Введите id студента, информацию о котором хотите именить в БД или 00 для отмены: ', 'Введите корректное id')
+    if id_for_changing == 0:
+        print("Отмена\n\n")
+        ui.menu()
+    if check_id(id_for_changing):
+        new_name, new_sur_name, new_gender, new_faculty = data_input_new_student()
+        sql.cur.execute(
+            f'''UPDATE students SET name = '{new_name}', surname = '{new_sur_name}', gender = '{new_gender}', faculty = '{new_faculty}' WHERE id = {id_for_changing}; ''')
 
-    names = []
-    inputs = []
-    query = "UPDATE students SET "
+        print(
+            f"Данные пользователя с id {id_for_changing} успешно обновлены на {new_name} {new_sur_name} {new_gender} {new_faculty}\n\n\n")
+        ui.menu()
+        sql.conn.commit()
+    else:
+        change_student_data()
 
-    if new_name != '':
-        names.append('name')
-        inputs.append(new_name)
-
-    if new_sur_name != '':
-        names.append('surname')
-        inputs.append(new_sur_name)
-
-    if new_gender != '':
-        names.append('gender')
-        inputs.append(new_gender)
-
-    if new_faculty != '':
-        names.append('faculty')
-        inputs.append(new_faculty)
-
-    inputs.append(id_for_changing)
-
-    query += " = ?,".join(names) + ' = ?' + " WHERE id = ?;"
-    sql.cur.execute(query, tuple(inputs))
-#
-    print(query)
+# удаление строки
 
 
-# удаляем всю строку
 def delete_student_data():
-    # Нужна проверка, существует ли такой id
     delete_st = input_integer(
         'Введите id студента, которого хотите удалить из БД: ', 'Введите корректное id')
     if check_id(delete_st):
