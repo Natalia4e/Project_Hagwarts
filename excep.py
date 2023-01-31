@@ -1,5 +1,7 @@
 import sql
 
+
+# проверка, что это число
 def input_integer(message, message_error):
     a = None
     while True:
@@ -13,12 +15,40 @@ def input_integer(message, message_error):
 
     return a
 
+# проверка для пола
+def input_gender(message, message_error):
+    action = None
+    while True:
+        if action is None:
+            val = input(message)
+            if val in ['m', 'f']:
+                action = val
+                break
+            else:
+                print(message_error)
+    return action
+
+
+# проверка для факультета
+def input_faculty(message, message_error):
+    action = None
+    while True:
+        if action is None:
+            val = input(message)
+            if val in ['Griffindorf', 'Slytherin','Ravenclaw', 'Hufflepuff']:
+                action = val
+                break
+            else:
+                print(message_error)
+    return action
+
 
 def add_student_data():
     name = input("Введите имя \n")
     sur_name = input("Введите Фамилию \n")
     gender = input("Введите пол \n")
-    faculty = input("Введите факультет \n")
+
+    faculty = input_faculty('Введите факультет: ', 'Введите корректный факультет: ')
     sql.add(name, sur_name, gender, faculty)
 
 
@@ -29,11 +59,11 @@ def show_all():
 
 
 def change_student_data():
-    id_for_changing = input_integer('Введите id студента, информацию о котором хотите именить в БД: ', 'Введите корректное id' )
+    id_for_changing = input_integer('Введите id студента, информацию о котором хотите изменить в БД: ', 'Введите корректное id!')
     new_name = input("Введите новое имя студента: \n")
     new_sur_name = input("Введите Фамилию \n")
-    new_gender = input("Введите пол \n")
-    new_faculty = input("Введите факультет \n")
+    new_gender = input_gender('Введите пол ', 'Введите корректный пол!')
+    new_faculty = input_faculty('Введите факультет: ', 'Введите корректный факультет: ')
 
     names = []
     inputs = []
@@ -65,7 +95,7 @@ def change_student_data():
 
 #удаляем всю строку
 def delete_student_data():
-    delete_st = input_integer('Введите id студента, которого хотите удалить из БД: ', 'Введите корректное id')
+    delete_st = input_integer('Введите id студента, которого хотите удалить в БД: ', 'Введите корректное id!')
     sql.cur.execute('DELETE FROM students WHERE id = ?;',
                     ((delete_st)))
     result = sql.cur.fetchall()
