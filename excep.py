@@ -1,6 +1,53 @@
+import re
 import sql
+import logg
+import ui
 
-def input_integer(message, message_error): # не понял, как это работает. Должно проверять, есть ли такой id в БД? Или должен проверять, что введен корректный формат?
+
+def check_id(x):
+    sql.cur.execute("SELECT id FROM students;")
+    available_ids = [i[0] for i in sql.cur.fetchall()]
+    return x in available_ids
+
+
+def check_in_data(data, op, meta):
+    pruve = None
+    while True:
+        if op == 1 and (not re.match(r"^[A-Za-zа-яА-ЯёЁ ]*$", data) is None):
+            pruve = True
+        elif op == 2 and (data == 'f' or data == 'm'):
+            pruve = True
+        elif op == 3 and (data == 'Hufflepuff' or data == 'Ravenclaw' or data == 'Gryffindorf' or data == 'Slytherin'):
+            pruve = True
+        if pruve:
+            return data
+        else:
+            print(f"Убедитесь, что ввели корректные данные: {meta}\n")
+            data = input("Еще раз\n")
+            logg.logging.error(f"Ошибка при вводе параметра {meta}")
+            continue
+
+
+def data_input():
+    name = check_in_data(input("Имя:\n"), 1, "Имя")
+    sur_name = check_in_data(input("Фамилия:\n"), 1, "Фамилия")
+    gender = check_in_data(input("Пол: женский - f; мужской - m\n"), 2, "Пол")
+    faculty = check_in_data(input(
+        "Факультет: Hufflepuff, Ravenclaw, Gryffindorf или Slytherin\n"), 3, "Факультет")
+    return name, sur_name, gender, faculty
+
+
+def data_input_new_student():
+    name = check_in_data(input("Новое имя:\n"), 1, "Имя")
+    sur_name = check_in_data(input("Новая фамилия:\n"), 1, "Фамилия")
+    gender = check_in_data(
+        input("Новый пол: женский - f; мужской - m\n"), 2, "Пол")
+    faculty = check_in_data(input(
+        "Новый факультет: Hufflepuff, Ravenclaw, Gryffindorf или Slytherin\n"), 3, "Факультет")
+    return name, sur_name, gender, faculty
+
+
+def input_integer(message, message_error):
     a = None
     while True:
         if a is None:
@@ -14,25 +61,20 @@ def input_integer(message, message_error): # не понял, как это ра
     return a
 
 
-def add_student_data_check(name, sur_name, gender, faculty):
-    # тут будет проверка корректности данных
-    
-    sql.add(name, sur_name, gender, faculty)
-
-
-def show_all_check():
+def show_all():
     # тут будет проверка, существует ли таблица. Нужна эта проверка или библиотека автоматически это делает?
     sql.cur.execute('SELECT * FROM students;')
     result = sql.cur.fetchall()
-    print(result)
+    for i in result:
+        print(*i)
+    print('\n\n')
+    ui.menu()
 
 
 def change_student_data():
-    id_for_changing = input_integer('Введите id студента, информацию о котором хотите именить в БД: ', 'Введите корректное id' )
-    new_name = input("Введите новое имя студента: \n")
-    new_sur_name = input("Введите Фамилию \n")
-    new_gender = input("Введите пол \n")
-    new_faculty = input("Введите факультет \n")
+    id_for_changing = input_integer(
+        'Введите id студента, информацию о котором хотите именить в БД: ', 'Введите корректное id')
+    new_name, new_sur_name, new_gender, new_faculty = data_input_new_student()
 
     names = []
     inputs = []
@@ -40,43 +82,57 @@ def change_student_data():
 
     if new_name != '':
         names.append('name')
-        inputs.append( new_name )
+        inputs.append(new_name)
 
     if new_sur_name != '':
         names.append('surname')
-        inputs.append( new_sur_name )
+        inputs.append(new_sur_name)
 
     if new_gender != '':
         names.append('gender')
-        inputs.append( new_gender )
+        inputs.append(new_gender)
 
     if new_faculty != '':
         names.append('faculty')
-        inputs.append( new_faculty )
+        inputs.append(new_faculty)
 
     inputs.append(id_for_changing)
 
     query += " = ?,".join(names) + ' = ?' + " WHERE id = ?;"
     sql.cur.execute(query, tuple(inputs))
-
+#
     print(query)
 
 
-#удаляем всю строку
+# удаляем всю строку
 def delete_student_data():
-    delete_st = input_integer('Введите id студента, которого хотите удалить из БД: ', 'Введите корректное id')
-    sql.cur.execute('DELETE FROM students WHERE id = ?;',
-                    ((delete_st)))
-    result = sql.cur.fetchall()
-    print(result)
-
+    # Нужна проверка, существует ли такой id
+    delete_st = input_integer(
+        'Введите id студента, которого хотите удалить из БД: ', 'Введите корректное id')
+    if check_id(delete_st):
+        sql.cur.execute("DELETE FROM students WHERE id = ?;",
+                        (str(delete_st)))
+        sql.conn.commit()
+        # result = sql.cur.fetchall()
+        print(f"Студент с id {delete_st} успешно удален")
+        ui.menu()
+    else:
+        delete_student_data()
 
 
 def search_student_data():
-    search = input("Введите искомое значение: \n")
-    sql.cur.execute('SELECT * FROM students WHERE name LIKE ? OR surname LIKE ? OR faculty LIKE ?;',
-                    (('%'+search+'%'), ('%'+search+'%'), ('%'+search+'%')))
-    result = sql.cur.fetchall()
-    print(result)
+    search = input(
+        "Введите искомое значение: имя, фамилию или факультет или 00 для отмены\n")
+    # Нужна проверка данных
+    if search == '00':
+        print('Отмена')
+    else:
+        logg.logging.info(f"Поиск студента {search}")
+        sql.cur.execute('SELECT * FROM students WHERE name LIKE ? OR surname LIKE ? OR faculty LIKE ?;',
+                        (('%'+search+'%'), ('%'+search+'%'), ('%'+search+'%')))
+        result = sql.cur.fetchall()
+        if result == []:
+            search_student_data()
+        print(result)
 
     print()

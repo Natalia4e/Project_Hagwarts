@@ -1,3 +1,3 @@
-from ui import menu
+import ui
 
-menu()
+ui.menu()

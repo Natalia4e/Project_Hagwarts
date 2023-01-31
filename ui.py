@@ -1,37 +1,45 @@
-import logging
+from logg import logging
 import excep
+import sql
 
 
 def menu():
-
-    type_num = input("Choise\n"
-                     "1 - add_student\n"
-                     "2 - change_data\n"
-                     "3 - delete_student\n"
-                     "4 - search_data\n"
-                     "6 - show_all\n"
-                     "5 - exit\n")
+    logging.info("Запуск приложения")
+    type_num = input("Выберите вариант работы с базой\n"
+                     "1 - Добавить данные студента\n"
+                     "2 - Изменить данные студента\n"
+                     "3 - Удалить данные студента\n"
+                     "4 - Найти студента\n"
+                     "5 - Показать всё\n"
+                     "6 - Выход\n")
     match type_num:
         case "1":
-            name = input("Введите имя \n")
-            sur_name = input("Введите Фамилию \n")
-            gender = input("Введите пол \n")
-            faculty = input("Введите факультет \n")
-            excep.add_student_data_check()
-            pass
+            logging.info("Добавляем студента")
+            print("Добавляем студента")
+            a, b, c, d = excep.data_input()
+            sql.add(a, b, c, d)
+           
         case "2":
+            logging.info("Изменяем данные")
+            print("Изменяем данные")
             excep.change_student_data()
-            pass
+            
         case "3":
+            logging.info("Удаление студента")
             excep.delete_student_data()
-            pass
+
         case "4":
+            logging.info("Поиск студента")
             excep.search_student_data()
-            pass
+
         case "5":
-            logging.info("Stop program")
+            logging.info("Вывод всей БД")
+            excep.show_all()
+
         case "6":
-            excep.show_all_check()
+            logging.info("Выход")
+            print("\n\nДо встречи!\n\n")
+            
         case _:
-            logging.error("ERROR")
-            print("ERR")
+            logging.error("Некорректный выбор режима")
+            print("Некорректный выбор режима\n")
