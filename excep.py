@@ -1,6 +1,6 @@
 import sql
 
-def input_integer(message, message_error):
+def input_integer(message, message_error): # не понял, как это работает. Должно проверять, есть ли такой id в БД? Или должен проверять, что введен корректный формат?
     a = None
     while True:
         if a is None:
@@ -14,15 +14,14 @@ def input_integer(message, message_error):
     return a
 
 
-def add_student_data():
-    name = input("Введите имя \n")
-    sur_name = input("Введите Фамилию \n")
-    gender = input("Введите пол \n")
-    faculty = input("Введите факультет \n")
+def add_student_data_check(name, sur_name, gender, faculty):
+    # тут будет проверка корректности данных
+    
     sql.add(name, sur_name, gender, faculty)
 
 
-def show_all():
+def show_all_check():
+    # тут будет проверка, существует ли таблица. Нужна эта проверка или библиотека автоматически это делает?
     sql.cur.execute('SELECT * FROM students;')
     result = sql.cur.fetchall()
     print(result)
