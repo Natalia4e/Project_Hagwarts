@@ -1,10 +1,13 @@
 import logging
+import datetime
+
+logging.basicConfig(level=logging.INFO, filename="py_log.log")
 
 
-logging.basicConfig(
-    level=logging.DEBUG,
-    encoding='utf-8',
-    filename="log_file.log",
-    format="%(asctime)s -- %(module)s -- %(levelname)s -- %(message)s",
-    datefmt='%d_%m_%Y %H:%M:%S',
-)
+def lod_action(mm):
+    now = datetime.datetime.now()
+    logging.info(f"{now} {mm}")
+
+def log_warn(mm):
+    now = datetime.datetime.now()
+    logging.warning(f"{now} {mm}")
